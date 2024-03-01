@@ -23,13 +23,13 @@ mediaRoutes.get('/media/:slug', async (req, res) => {
   });
 });
 
-mediaRoutes.get('/media/related/:title', async (req, res) => {
-  const title = req.params.title;
+mediaRoutes.get('/media/related/:slug', async (req, res) => {
+  const slug = req.params.slug;
   await db().then(async resp => {
-    const mainTitle = await resp.collection('media').find({name: title}).toArray();
+    const mainTitle = await resp.collection('media').find({slug: slug}).toArray();
     let results = [];
     if (mainTitle[0]) {
-      results = await resp.collection('media').find({name: {$in: mainTitle[0].relatedMedia}}).toArray();
+      results = await resp.collection('media').find({slug: {$in: mainTitle[0].relatedMedia}}).toArray();
     }
     res.send(results);
   });
