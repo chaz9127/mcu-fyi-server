@@ -7,8 +7,6 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const corsOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 3001;
 
-console.log(process.env.NODE_ENV);
-
 app.use(express.json());
 app.use(cors(corsOptions));
 

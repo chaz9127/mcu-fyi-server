@@ -15,10 +15,10 @@ mediaRoutes.get('/media', async (req, res) => {
   });
 });
 
-mediaRoutes.get('/media/:title', async (req, res) => {
-  const title = req.params.title;
+mediaRoutes.get('/media/:slug', async (req, res) => {
+  const slug = encodeURI(req.params.slug);
   await db().then(async resp => {
-    const result = await resp.collection('media').find({name: title}).toArray();
+    const result = await resp.collection('media').find({slug}).toArray();
     res.send(result);
   });
 });
