@@ -1,0 +1,6 @@
+- install git
+- install nvm
+- install node v20.9.0
+- ask CJ for .env file
+- `npm i`
+- `npm run dev` 
