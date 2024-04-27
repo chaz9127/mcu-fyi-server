@@ -11,6 +11,16 @@ const getAllUsers = asyncHandler(async (req, res) => {
     res.json(users)
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    const email = req.user;
+    const user = await User.findOne({email}).select('-password').lean();
+    if (!user) {
+        return res.status(400).json({message: 'No Users Found'});
+    }
+
+    res.json(user)
+})
+
 const createNewUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
@@ -46,7 +56,8 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 module.exports = {
     getAllUsers,
+    getCurrentUser,
     createNewUser,
     updateUser,
-    deleteUser
+    deleteUser,
 }
