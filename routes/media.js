@@ -15,14 +15,6 @@ mediaRoutes.get('/media', async (req, res) => {
   });
 });
 
-mediaRoutes.get('/media/:slug', async (req, res) => {
-  const slug = encodeURI(req.params.slug);
-  await db().then(async resp => {
-    const result = await resp.collection('media').find({slug}).toArray();
-    res.send(result);
-  });
-});
-
 mediaRoutes.get('/media/related/:slug', async (req, res) => {
   const slug = req.params.slug;
   await db().then(async resp => {

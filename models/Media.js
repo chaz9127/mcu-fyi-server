@@ -9,7 +9,7 @@ const mediaSchema = new mongoose.Schema({
     slug: { type: String, required: true },
     phase: { type: Number, required: true},
     releaseDate: { type: Number, required: true},
-    relatedMedia: [{type: mongoose.Schema.Types.ObjectId}],
+    relatedMedia: [{type: String}],
 },
 {
     timestamps: true
