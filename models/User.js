@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { type: String, required: true, default: 'member' },
     watched: [{type: mongoose.Schema.Types.ObjectId}],
+    accessToken: { type: String, required: false},
 },
 {
     timestamps: true
