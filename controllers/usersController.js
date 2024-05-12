@@ -48,7 +48,16 @@ const createNewUser = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    // update watched property
+    // console.log(req.body);
+    const { watched, role, email} = req.body;
+    // const user = await User.findOne({email}).lean().exec();
+    const user = await User.findOneAndUpdate({email}, {watched, role, email}).lean().exec();
+    if (user) {
+        res.status(201).json(user)
+    } else {
+        res.status(400).json({message: 'Unable to update user.'});
+    }
+
 })
 
 const deleteUser = asyncHandler(async (req, res) => {
