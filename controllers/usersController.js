@@ -48,10 +48,14 @@ const createNewUser = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    // console.log(req.body);
     const { watched, role, email} = req.body;
-    // const user = await User.findOne({email}).lean().exec();
-    const user = await User.findOneAndUpdate({email}, {watched, role, email}).lean().exec();
+    const user = await (
+        User
+        .findOneAndUpdate({email}, {watched, role, email})
+        .select('-password')
+        .lean()
+        .exec()
+    );
     if (user) {
         res.status(201).json(user)
     } else {
