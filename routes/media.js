@@ -9,7 +9,7 @@ const db = require("../db/conn");
 
 mediaRoutes.get('/media', async (req, res) => {
   await db().then(async resp => {
-    const result = await resp.collection('media').find().sort({ phase: 1, releaseDate: 1}).toArray();
+    const result = await resp.collection('media').find().sort({ releaseDate: 1}).toArray();
 
     res.send(result);
   });
