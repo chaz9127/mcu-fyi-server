@@ -5,11 +5,12 @@ const mediaSchema = new mongoose.Schema({
     poster: { type: String, required: true },
     description: { type: String, required: true },
     playLink: { type: String, required: true },
+    playLinkIcon: { type: String, required: false },
     trailerLink: { type: String, required: true },
     slug: { type: String, required: true },
-    phase: { type: Number, required: true},
     releaseDate: { type: Number, required: true},
     relatedMedia: [{type: String}],
+    chronologicalOrder: {type: Number, required: true}
 },
 {
     timestamps: true
