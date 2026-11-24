@@ -4,13 +4,22 @@ const mediaSchema = new mongoose.Schema({
     name: { type: String, required: true },
     poster: { type: String, required: true },
     description: { type: String, required: true },
-    playLink: { type: String, required: true },
+    duration: { type: String, required: false },
+    type: { type: String, required: true, enum: ['movie', 'series', 'short', 'special'] },
+    season: { type: Number, required: false },
+    // Unknown until a title is available, so these can be empty.
+    playLink: { type: String, default: '' },
     playLinkIcon: { type: String, required: false },
-    trailerLink: { type: String, required: true },
+    trailerLink: { type: String, default: '' },
     slug: { type: String, required: true },
     releaseDate: { type: Number, required: true},
     relatedMedia: [{type: String}],
-    chronologicalOrder: {type: Number, required: true}
+    chronologicalOrder: {
+        type: Number,
+        required: true,
+        min: [1, 'chronologicalOrder must be 1 or higher'],
+        validate: { validator: Number.isInteger, message: 'chronologicalOrder must be a whole number' },
+    }
 },
 {
     timestamps: true

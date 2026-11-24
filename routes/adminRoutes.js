@@ -7,5 +7,6 @@ const verifyAdmin = require('../middleware/verifyAdmin');
 router.use(verifyJWT, verifyAdmin);
 
 router.route('/fetch-movie').post(adminController.fetchMovie)
+router.route('/media').post(adminController.insertMedia)
 
 module.exports = router;

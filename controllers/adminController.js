@@ -1,11 +1,18 @@
 const path = require('path');
 const { execFile } = require('child_process');
+const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
+const Media = require('../models/Media');
+const parseMediaSource = require('../utils/parseMediaSource');
 
 const ROOT = path.join(__dirname, '..');
 const FETCH_MOVIE_SCRIPT = path.join(ROOT, 'scripts', 'fetch-movie.mjs');
 const FETCH_MOVIE_TIMEOUT = 45 * 1000;
 const MAX_TITLE_LENGTH = 200;
+const MEDIA_FIELDS = [
+    'name', 'poster', 'releaseDate', 'description', 'slug', 'duration', 'type', 'season',
+    'playLink', 'playLinkIcon', 'trailerLink', 'relatedMedia', 'chronologicalOrder',
+];
 
 // Arguments are passed as an array with no shell, so the title can't inject commands.
 const runScript = (script, args) => new Promise((resolve) => {
@@ -42,6 +49,64 @@ const fetchMovie = asyncHandler(async (req, res) => {
     res.json({ output: stdout, warnings: stderr ? stderr.split('\n') : [] });
 })
 
+const insertMedia = asyncHandler(async (req, res) => {
+    const { source } = req.body;
+    if (typeof source !== 'string' || !source.trim()) {
+        return res.status(400).json({ message: 'A media object is required' });
+    }
+
+    let data;
+    try {
+        data = parseMediaSource(source);
+    } catch (err) {
+        return res.status(400).json({ message: `Could not read the media object: ${err.message}` });
+    }
+
+    // Mongoose would silently drop these, which would hide typos.
+    const unknown = Object.keys(data).filter((field) => !MEDIA_FIELDS.includes(field));
+    if (unknown.length) {
+        return res.status(400).json({ message: `Unknown fields: ${unknown.join(', ')}` });
+    }
+
+    const media = new Media(data);
+    const invalid = media.validateSync();
+    if (invalid) {
+        const message = Object.values(invalid.errors).map((error) => error.message).join(' ');
+        return res.status(400).json({ message });
+    }
+
+    // The driver is used directly, so that new records keep the same shape and
+    // number types as the existing ones (no timestamps or version key).
+    const document = media.toObject();
+    document.releaseDate = mongoose.mongo.Long.fromNumber(document.releaseDate);
+    const { slug, name, chronologicalOrder } = document;
+    const collection = Media.collection;
+
+    // In a transaction, so that a failed insert can't leave the order shifted.
+    const result = await mongoose.connection.transaction(async (session) => {
+        if (await collection.findOne({ slug }, { session })) return { duplicate: true };
+
+        let shifted = 0;
+        if (await collection.findOne({ chronologicalOrder }, { session })) {
+            const update = await collection.updateMany(
+                { chronologicalOrder: { $gte: chronologicalOrder } },
+                { $inc: { chronologicalOrder: 1 } },
+                { session }
+            );
+            shifted = update.modifiedCount;
+        }
+        await collection.insertOne(document, { session });
+        return { shifted };
+    });
+
+    if (result.duplicate) {
+        return res.status(409).json({ message: `Media with the slug "${slug}" already exists` });
+    }
+
+    res.status(201).json({ name, chronologicalOrder, shifted: result.shifted });
+})
+
 module.exports = {
     fetchMovie,
+    insertMedia,
 }
