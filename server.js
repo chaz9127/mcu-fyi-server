@@ -16,6 +16,7 @@ app.use('/', require('./routes/root'));
 app.use('/users', require('./routes/userRoutes'));
 app.use('/media', require('./routes/mediaRoutes'));
 app.use('/auth', require('./routes/authRoutes'));
+app.use('/feedback', require('./routes/feedbackRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 
 app.all('*', (req, res) => {
