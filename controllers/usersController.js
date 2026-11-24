@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 
 const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find().select('-password').lean();
+    const users = await User.find().select('-password -accessToken').lean();
     if (!users?.length) {
         return res.status(400).json({message: 'No Users Found'});
     }
@@ -48,10 +48,11 @@ const createNewUser = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { watched, role, email} = req.body;
+    // Users can only update themselves, and can't change their own role.
+    const { watched } = req.body;
     const user = await (
         User
-        .findOneAndUpdate({email}, {watched, role, email})
+        .findOneAndUpdate({email: req.user}, {watched})
         .select('-password')
         .lean()
         .exec()
